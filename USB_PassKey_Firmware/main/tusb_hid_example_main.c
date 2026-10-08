@@ -259,7 +259,7 @@ static void app_goto_security_settings() {
     app_dynamic_hid_print("CET");
 
     // Enter Password and press ENTER
-    app_dynamic_hid_print("SecretPswd\t\n");
+    app_dynamic_hid_print("SecretPass\t\n");
 }
 
 static void app_send_mouse_movement(){
@@ -271,7 +271,7 @@ static void app_send_mouse_movement(){
         // Get the next x and y delta in the draw square pattern
         mouse_draw_square_next_delta(&delta_x, &delta_y);
         tud_hid_mouse_report(HID_ITF_PROTOCOL_MOUSE, 0x00, delta_x, delta_y, 0, 0);
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(20)); 
     }
 }
 
