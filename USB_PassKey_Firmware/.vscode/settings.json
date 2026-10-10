@@ -24,15 +24,14 @@
   ],
   "idf.currentSetup": "C:\\esp\\v6.1\\esp-idf",
   "idf.customExtraVars": {
-    "IDF_TARGET": "esp32s3",
-    "OPENOCD_USB_ADAPTER_LOCATION": "1-1.1"
+    "IDF_TARGET": "esp32s3"
   },
   "clangd.path": "C:\\Espressif\\tools\\esp-clangd\\esp-21.1.3_20260408\\esp-clangd\\bin\\clangd.exe",
   "clangd.arguments": [
     "--background-index",
     "--query-driver=**",
-    "--compile-commands-dir=c:\\Users\\91988\\Documents\\GitHub\\USB_PassKey\\build"
+    "--compile-commands-dir=c:\\Users\\91988\\Documents\\GitHub\\USB_PassKey\\USB_PassKey_Firmware\\build"
   ],
   "idf.port": "COM5",
-  "idf.flashType": "UART"
+  "idf.flashType": "JTAG"
 }
