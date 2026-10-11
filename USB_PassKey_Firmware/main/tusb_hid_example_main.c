@@ -16,6 +16,7 @@
 #include "esp_err.h"
 #include "esp_private/usb_phy.h"
 
+#define APP_BUTTON (GPIO_NUM_0)
 #define BUTTON_1 (GPIO_NUM_12)
 #define BUTTON_2 (GPIO_NUM_13)
 static const char *TAG = "HID";
@@ -344,10 +345,11 @@ static void on_button_press(int button)
         ESP_LOGI(TAG, "Mounted, sending keys");
         switch (button)
         {
-        case 1:
+        case BUTTON_1:
             app_login_creds();
             break;
-        case 2:
+        case BUTTON_2:
+        case APP_BUTTON:
             app_protection_release_creds();
             break;
         default:
@@ -363,38 +365,19 @@ static void on_button_press(int button)
     usb_tinyusb_stop();
 }
 
-static void handle_button1()
+static void handle_button(gpio_num_t btn)
 {
-    if (gpio_get_level(BUTTON_1) == 0)
+    if (gpio_get_level(btn) == 0)
     {                                  // pressed (active low)
         vTaskDelay(pdMS_TO_TICKS(30)); // debounce
-        if (gpio_get_level(BUTTON_1) != 0)
+        if (gpio_get_level(btn) != 0)
         {
             return;
         }
-        ESP_LOGI(TAG, "Button 1 Pressed");
-        on_button_press(1);
+        ESP_LOGI(TAG, "Button %d Pressed", btn);
+        on_button_press(btn);
         // wait for release so we don't retrigger
-        while (gpio_get_level(BUTTON_1) == 0)
-        {
-            vTaskDelay(pdMS_TO_TICKS(10));
-        }
-    }
-}
-
-static void handle_button2()
-{
-    if (gpio_get_level(BUTTON_2) == 0)
-    {                                  // pressed (active low)
-        vTaskDelay(pdMS_TO_TICKS(30)); // debounce
-        if (gpio_get_level(BUTTON_2) != 0)
-        {
-            return;
-        }
-        ESP_LOGI(TAG, "Button 2 Pressed");
-        on_button_press(2);
-        // wait for release so we don't retrigger
-        while (gpio_get_level(BUTTON_2) == 0)
+        while (gpio_get_level(btn) == 0)
         {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
@@ -421,6 +404,16 @@ static void button_setup()
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
     };
     ESP_ERROR_CHECK(gpio_config(&button2_config));
+
+    // boot btn, gpio 0
+    const gpio_config_t boot_button_config = {
+        .pin_bit_mask = BIT64(APP_BUTTON),
+        .mode = GPIO_MODE_INPUT,
+        .intr_type = GPIO_INTR_DISABLE,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+    };
+    ESP_ERROR_CHECK(gpio_config(&boot_button_config));
 }
 
 static void button_task(void *arg)
@@ -431,8 +424,9 @@ static void button_task(void *arg)
 
     while (1)
     {
-        handle_button1();
-        handle_button2();
+        handle_button(APP_BUTTON);
+        handle_button(BUTTON_1);
+        handle_button(BUTTON_2);
         // ESP_LOGI(TAG, "loop");
         vTaskDelay(pdMS_TO_TICKS(100));
     }
